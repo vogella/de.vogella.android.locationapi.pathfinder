@@ -25,8 +25,8 @@ public class Pathfinder extends Activity {
 			TextView latituteField = (TextView) findViewById(R.id.TextView02);
 			TextView  longitudeField = (TextView) findViewById(R.id.TextView04);
 			if (location != null){
-				int lat = (int) (location.getLatitude());
-				int lng = (int) (location.getLongitude());
+				float lat = (float) (location.getLatitude());
+				float lng = (float) (location.getLongitude());
 				latituteField.setText(String.valueOf(lat));
 				longitudeField.setText(String.valueOf(lng));
 				
