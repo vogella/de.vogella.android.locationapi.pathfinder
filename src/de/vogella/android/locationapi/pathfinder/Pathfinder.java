@@ -1,40 +1,69 @@
 package de.vogella.android.locationapi.pathfinder;
 
-import android.app.Activity;
 import android.content.Context;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.TextView;
 
-public class Pathfinder extends Activity {
+import com.google.android.maps.GeoPoint;
+import com.google.android.maps.MapActivity;
+import com.google.android.maps.MapController;
+import com.google.android.maps.MapView;
+import com.google.android.maps.MyLocationOverlay;
 
-	/** Called when the activity is first created. */
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+public class Pathfinder extends MapActivity {
+
+	private MapView mapView;
+	private MapController mapController;
+
+	public void onCreate(Bundle bundle) {
+		super.onCreate(bundle);
 		setContentView(R.layout.main);
+		mapView = (MapView) findViewById(R.id.mapview);
+		mapView.setBuiltInZoomControls(true); // ZoomControls
+		mapView.setSatellite(true); // Set View to Satellite
+		mapController = mapView.getController();
+		mapController.setZoom(14);
+		LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0,
+				0, new GeoUpdateHandler());
+		initMyLocation();
 	}
 
-	public void showLocation(View view) {
-		switch (view.getId()) {
-		case R.id.Button01:
-			LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-			Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-			TextView latituteField = (TextView) findViewById(R.id.TextView02);
-			TextView  longitudeField = (TextView) findViewById(R.id.TextView04);
-			if (location != null){
-				float lat = (float) (location.getLatitude());
-				float lng = (float) (location.getLongitude());
-				latituteField.setText(String.valueOf(lat));
-				longitudeField.setText(String.valueOf(lng));
-				
-			} else {
-				latituteField.setText("GPS not available");
-				longitudeField.setText("GPS not available");
-			}
-			break;
+	public class GeoUpdateHandler implements LocationListener {
+		@Override
+		public void onLocationChanged(Location location) {
+			int lat = (int) (location.getLatitude() * 1E6);
+			int lng = (int) (location.getLongitude() * 1E6);
+			mapController.animateTo(new GeoPoint(lat, lng));
+		}
+		// Leere Methoden weggelassen
+
+		@Override
+		public void onProviderDisabled(String provider) {
+			
+		}
+
+		@Override
+		public void onProviderEnabled(String provider) {
+		}
+
+		@Override
+		public void onStatusChanged(String provider, int status, Bundle extras) {
 		}
 	}
+
+	private void initMyLocation() {
+		MyLocationOverlay myLocOverlay = new MyLocationOverlay(this, mapView);
+		myLocOverlay.enableMyLocation();
+		myLocOverlay.enableCompass();
+		mapView.getOverlays().add(myLocOverlay);
+	}
+
+	@Override
+	protected boolean isRouteDisplayed() {
+		return false;
+	}
+
 }
